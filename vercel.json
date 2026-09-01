@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "backend/api.js", "use": "@vercel/node" },
+    { "src": "frontend/index.html", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/backend/api.js" },
+    { "src": "/frontend/(.*)", "dest": "/frontend/$1" },
+    { "src": "/(.*)", "dest": "/frontend/index.html" }
+  ],
+  "env": {
+    "HERMES_HOME": "/Users/jeffreyz/.hermes",
+    "PYTHONPATH": "/Users/jeffreyz/.hermes/skills/evidence-trading/tools"
+  }
+}
