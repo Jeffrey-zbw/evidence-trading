@@ -29,16 +29,17 @@ module.exports = (req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'ok', service: 'Evidence-Trading API (Vercel)' }));
   } else if (path === '/api/picks') {
-    // 返回模拟数据（Vercel 无法直接调用 Python）
+    // 返回模拟数据（排除涨停股）
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       date: new Date().toISOString().split('T')[0],
       picks: [
-        { code: '002594', name: '比亚迪', sector: '汽车', price: 303.03, change_pct: 2.29, total_score: 71.5, total_mv_yi: 8200 },
-        { code: '000858', name: '五粮液', sector: '白酒', price: 178.50, change_pct: 1.15, total_score: 68.2, total_mv_yi: 7100 },
-        { code: '601012', name: '隆基绿能', sector: '光伏', price: 35.80, change_pct: -0.56, total_score: 65.0, total_mv_yi: 1800 },
+        { code: '300059', name: '东方财富', sector: '金融', price: 18.50, change_pct: 4.26, total_score: 72.5, total_mv_yi: 115.5, source: 'mock' },
+        { code: '002594', name: '比亚迪', sector: '汽车', price: 285.30, change_pct: -2.29, total_score: 68.0, total_mv_yi: 127.3, source: 'mock' },
+        { code: '601012', name: '隆基绿能', sector: '光伏', price: 28.60, change_pct: -4.19, total_score: 65.5, total_mv_yi: 128.5, source: 'mock' },
       ],
-      data_source: 'mock'
+      data_source: 'mock',
+      note: '已排除涨停股（>=9.5%），14:30可买入'
     }));
   } else if (path === '/api/risk/check') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
