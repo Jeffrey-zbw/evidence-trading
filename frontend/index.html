@@ -484,7 +484,7 @@
                 }
                 
                 function showQuoteDetail(stock) {
-                    ElMessage.info(`查看 ${stock.name}(${stock.code}) 详情`);
+                    window.open('https://quote.eastmoney.com/' + (stock.code.startsWith('6') ? 'sh' : 'sz') + '/' + stock.code + '.html', '_blank');
                 }
                 
                 return {
