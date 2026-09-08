@@ -100,6 +100,16 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') { res.statusCode = 204; res.end(); return; }
 
+  // 统一读取请求体 (POST 回测用), 先读完再进分支, 避免竞态
+  const bodyRaw = await new Promise((resolveBody) => {
+    let b = '';
+    req.on('data', (c) => (b += c));
+    req.on('end', () => resolveBody(b));
+    req.on('error', () => resolveBody(''));
+  });
+  let bodyJson = null;
+  try { bodyJson = bodyRaw ? JSON.parse(bodyRaw) : null; } catch (e) { bodyJson = null; }
+
   try {
     if (path === '/api/health') {
       send(res, 200, { status: 'ok', service: 'Evidence-Trading (Vercel 快照)' });
@@ -129,8 +139,8 @@ module.exports = async (req, res) => {
       const d = await readData('risk_check.json', { alerts: [] });
       send(res, 200, { alerts: d.alerts || [], data_source: 'snapshot', note: '价格预警快照（14:45 生成）' });
     } else if (path === '/api/backtest') {
-      // 回测用模拟 K 线 (本地/云端一致), 读 query 里的 symbol, 不依赖 request body
-      const symbol = url.searchParams.get('symbol') || '';
+      // 回测用模拟 K 线 (本地/云端一致)。symbol 优先 POST body, 其次 query。
+      const symbol = (bodyJson && bodyJson.symbol) || url.searchParams.get('symbol') || '';
       send(res, 200, { ...MOCK_BACKTEST, symbol });
     } else {
       send(res, 404, { error: 'Not found', path });
