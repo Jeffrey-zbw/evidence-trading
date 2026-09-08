@@ -119,18 +119,29 @@
                         <div class="stock-info">
                             <div>
                                 <div class="stock-code">{{ stock.code }}</div>
-                                <div class="stock-name">{{ stock.name }} <span class="stock-sector">{{ stock.sector }}</span></div>
+                                <div class="stock-name">{{ stock.name }} <span class="stock-sector" v-if="stock.total_mv_yi">{{ stock.total_mv_yi }}亿</span></div>
                             </div>
-                            <span class="score-badge">综合 {{ stock.total_score?.toFixed(1) }}</span>
+                            <span class="score-badge" v-if="stock.total_score != null">综合 {{ stock.total_score?.toFixed(1) }}</span>
+                            <span class="score-badge" v-else-if="stock.position">仓位 {{ stock.position }}</span>
                         </div>
-                        <div class="stock-price">
+                        <div class="stock-price" v-if="stock.price != null">
                             <div class="price">{{ stock.price?.toFixed(2) }}</div>
                             <div class="change" :class="stock.change_pct >= 0 ? 'positive' : 'negative'">
                                 {{ stock.change_pct >= 0 ? '+' : '' }}{{ stock.change_pct?.toFixed(2) }}%
                             </div>
                         </div>
+                        <div class="stock-price" v-else-if="stock.entry_zone">
+                            <div class="price" style="font-size:14px;">{{ stock.entry_zone }}</div>
+                            <div class="change" style="font-size:12px;color:#909399;">建议介入区间</div>
+                        </div>
+                    </div>
+                    <div v-if="picks[0] && picks[0].logic" class="picks-logic">
+                        <div v-for="stock in picks" :key="'l'+stock.code" style="margin-bottom:10px;">
+                            <b>{{ stock.name }}</b>：{{ stock.logic }}
+                        </div>
                     </div>
                 </div>
+                <div v-if="picks[0] && picks[0].note" style="margin-top:12px;color:#909399;font-size:12px;">{{ picks[0].note }}{{ picks[0].report_file ? ' · 日报 ' + picks[0].report_file : '' }}</div>
             </div>
 
             <!-- Market Summary -->
@@ -146,39 +157,26 @@
                 </div>
                 
                 <div v-else-if="marketData">
-                    <div class="metrics-grid" style="margin-bottom: 20px;">
-                        <div class="metric-card">
-                            <div class="metric-value">{{ marketData.indices.shanghai.price }}</div>
-                            <div class="metric-label">上证指数 {{ marketData.indices.shanghai.change_pct >= 0 ? '+' : '' }}{{ marketData.indices.shanghai.change_pct }}%</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value">{{ marketData.indices.shenzhen.price }}</div>
-                            <div class="metric-label">深成指 {{ marketData.indices.shenzhen.change_pct >= 0 ? '+' : '' }}{{ marketData.indices.shenzhen.change_pct }}%</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value">{{ marketData.indices.chinext.price }}</div>
-                            <div class="metric-label">创业板 {{ marketData.indices.chinext.change_pct >= 0 ? '+' : '' }}{{ marketData.indices.chinext.change_pct }}%</div>
+                    <div v-if="marketData.note" style="margin-bottom:14px;padding:10px 14px;background:#f5f7fa;border-radius:8px;color:#909399;font-size:13px;">{{ marketData.note }}</div>
+
+                    <div v-if="marketData.overview" style="margin-bottom:20px;">
+                        <div style="font-weight:600;margin-bottom:8px;">📈 大盘简评</div>
+                        <div style="color:#555;font-size:14px;line-height:1.7;">{{ marketData.overview }}</div>
+                    </div>
+
+                    <div v-if="marketData.hot_sectors && marketData.hot_sectors.length">
+                        <div style="font-weight:600;margin-bottom:10px;">🔥 热点板块</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                            <span v-for="s in marketData.hot_sectors" :key="s" style="background:#f0f9ff;color:#0ea5e9;padding:4px 12px;border-radius:12px;font-size:13px;">{{ s }}</span>
                         </div>
                     </div>
-                    
-                    <div style="margin-top: 20px;">
-                        <div style="font-weight: 600; margin-bottom: 10px;">🔥 热点板块</div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                            <span v-for="s in marketData.hot_sectors" :key="s" style="background: #f0f9ff; color: #0ea5e9; padding: 4px 12px; border-radius: 12px; font-size: 13px;">{{ s }}</span>
-                        </div>
+
+                    <div v-if="marketData.sentiment" style="padding:15px;background:#fafafa;border-radius:8px;">
+                        <div style="font-weight:600;margin-bottom:8px;">🎯 市场情绪</div>
+                        <div style="color:#666;font-size:14px;line-height:1.7;">{{ marketData.sentiment }}</div>
                     </div>
-                    
-                    <div style="margin-top: 15px;">
-                        <div style="font-weight: 600; margin-bottom: 10px;">❄️ 弱势板块</div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                            <span v-for="s in marketData.cool_sectors" :key="s" style="background: #fef2f2; color: #ef4444; padding: 4px 12px; border-radius: 12px; font-size: 13px;">{{ s }}</span>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 8px;">
-                        <div style="font-weight: 600; margin-bottom: 8px;">📈 市场情绪</div>
-                        <div style="color: #666; font-size: 14px;">{{ marketData.sentiment }}</div>
-                    </div>
+
+                    <div style="margin-top:16px;color:#c0c4cc;font-size:12px;">数据源：{{ marketData.data_source || '日报' }}{{ marketData.report_file ? ' · 日报 ' + marketData.report_file : '' }}</div>
                 </div>
             </div>
 
@@ -207,8 +205,13 @@
                             </div>
                         </div>
                         <div style="font-size: 13px; color: #666;">
-                            <div v-for="(rule, ridx) in plan.rules" :key="ridx" style="padding: 4px 0; border-bottom: 1px dashed #e0e0e0;">
-                                <span style="color: #667eea; margin-right: 8px;">•</span>{{ rule }}
+                            <div style="padding: 4px 0; border-bottom: 1px dashed #e0e0e0;" v-if="Array.isArray(plan.rules)">
+                                <div v-for="(rule, ridx) in plan.rules" :key="ridx" style="padding: 4px 0;">
+                                    <span style="color: #667eea; margin-right: 8px;">•</span>{{ rule }}
+                                </div>
+                            </div>
+                            <div v-else-if="plan.rules" style="padding: 4px 0; line-height: 1.6;">
+                                <span style="color: #667eea; margin-right: 8px;">•</span>{{ plan.rules }}
                             </div>
                         </div>
                     </div>

@@ -24,6 +24,59 @@ from market_bot import MarketBot
 from analysis_bot import AnalysisBot
 from risk_bot import RiskBot
 
+# 唯一持仓源：skills/evidence-trading/tools/positions_lib.py
+# （底层数据为 skills/evidence-trading/data/positions.json，由 update_positions.py 维护）
+sys.path.insert(0, str(tools_path))
+try:
+    from positions_lib import active_positions, alert_rules
+except Exception:  # positions_lib 缺失时兜底为空
+    def active_positions():
+        return []
+
+    def alert_rules():
+        return []
+
+# ========== 同源数据目录（H5 与日常推送共用，由 14:35 解析脚本落盘） ==========
+DATA_DIR = Path(__file__).parent.parent / "data"
+
+
+def _load_data(filename: str, default=None):
+    """读 data/ 目录下的 JSON（同源数据源）；缺失返回 default。"""
+    p = DATA_DIR / filename
+    if p.exists():
+        try:
+            return json.loads(p.read_text())
+        except Exception:
+            return default
+    return default
+
+
+def _linear_rank(values: List[float], higher_is_better: bool = True) -> List[float]:
+    """线性分位打分：前1%得满分，后1%得0分，中间线性插值"""
+    if not values:
+        return []
+    sorted_vals = sorted(values)
+    n = len(sorted_vals)
+    rank_map = {}
+    for i, v in enumerate(sorted_vals):
+        rank_map[v] = i / (n - 1) if n > 1 else 0.5
+    if not higher_is_better:
+        return [1 - rank_map.get(v, 0.5) for v in values]
+    return [rank_map.get(v, 0.5) for v in values]
+
+
+def _linear_rank_pe(pe_values: List[float]) -> List[float]:
+    """PE估值反向打分：PE越低得分越高"""
+    if not pe_values:
+        return []
+    sorted_vals = sorted(pe_values)
+    n = len(sorted_vals)
+    rank_map = {}
+    for i, v in enumerate(sorted_vals):
+        rank_map[v] = i / (n - 1) if n > 1 else 0.5
+    # 反向：低PE得高分
+    return [1 - rank_map.get(v, 0.5) for v in pe_values]
+
 app = FastAPI(title="Evidence-Trading API", version="1.0.0")
 
 # CORS 配置
@@ -66,51 +119,28 @@ async def status():
 
 @app.get("/api/picks")
 async def picks(n: int = Query(10, ge=1, le=50)):
-    """获取选股推荐（中小市值 50-300亿）"""
+    """获取选股推荐。同源：14:30 日报候选；无则实时量化扫描。"""
+    # 1) 同源：解析自 14:30 日报的候选（含看多逻辑/介入区间/仓位）
+    daily = _load_data("daily_picks.json")
+    if daily and daily.get("picks"):
+        return {
+            "date": daily.get("date"),
+            "picks": daily["picks"][:n],
+            "data_source": daily.get("data_source", "market 日报"),
+            "report_file": daily.get("report_file"),
+            "note": daily.get("note", "仅为技术推演，非投资建议"),
+            "is_live_scan": False,
+        }
+    # 2) 兜底：实时量化扫描（刚收盘/日报未生成时）
     try:
-        # 获取全市场股票
-        stocks = market_bot.get_all_stocks()
-
-        # 筛选中小市值 50-300亿，排除涨停股
-        filtered_stocks = []
-        for stock in stocks:
-            mv = stock.get('total_mv_yi', 0)
-            change_pct = stock.get('change_pct', 0)
-            # 市值 50-300亿 + 排除涨停股（涨幅≥9.5%）
-            if 50 <= mv <= 300 and change_pct < 9.5:
-                filtered_stocks.append(stock)
-
-        # 添加评分
-        for stock in filtered_stocks:
-            score = 0
-            change_pct = stock.get('change_pct', 0)
-            # 涨跌幅因子：温和波动优先
-            if -3 <= change_pct <= 3:
-                score += 40
-            elif 3 < change_pct < 9.5:
-                score += max(0, 40 - (change_pct - 3) * 5)
-            elif change_pct < -3:
-                score += max(0, 20 + change_pct)
-
-            # PE估值因子
-            pe = stock.get('pe_ratio')
-            if pe and 0 < pe < 50:
-                score += min(30, max(0, 50 - pe))
-            elif pe and pe >= 50:
-                score += 10
-
-            # 成交量因子
-            volume = stock.get('volume', 0)
-            score += min(30, volume / 500000)
-
-            stock["total_score"] = round(score, 1)
-
-        filtered_stocks.sort(key=lambda x: x.get("total_score", 0), reverse=True)
-
+        picked = market_bot.scan_stocks_by_quant(limit=n)
         return {
             "date": datetime.now().strftime("%Y-%m-%d"),
-            "picks": filtered_stocks[:n],
-            "data_source": "mock" if market_bot.use_mock else "eastmoney"
+            "picks": picked,
+            "data_source": "mock" if market_bot.use_mock else "tencent",
+            "filter_stats": {"total_candidates": len(picked), "final_count": len(picked)},
+            "is_live_scan": True,
+            "note": "日报候选未生成，展示实时量化扫描结果",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -148,104 +178,91 @@ async def backtest(req: BacktestRequest):
 
 @app.get("/api/risk/check")
 async def risk_check(positions: Optional[str] = None):
-    """检查持仓风险"""
+    """检查持仓风险。唯一持仓源：positions.json（active_positions）。
+    优先返回 14:35 同源 risk_check.json；否则实时算。"""
+    # 同源优先
+    cached = _load_data("risk_check.json")
+    if cached and cached.get("positions"):
+        return cached
+    # 实时计算（兜底）
     try:
-        # 使用默认持仓
         if positions is None:
-            positions = [
-                {"code": "002283", "name": "天润工业", "shares": 100, "cost": 4.615},
-                {"code": "600221", "name": "海航控股", "shares": 500, "cost": 8.0047},
-                {"code": "603993", "name": "洛阳钼业", "shares": 300, "cost": 20.58},
-                {"code": "002181", "name": "粤传媒", "shares": 100, "cost": 22.97},
-                {"code": "601618", "name": "中国中冶", "shares": 100, "cost": 3.39},
-            ]
+            pos_list = active_positions()
         else:
-            positions = json.loads(positions)
-
-        result = risk_bot.check_position_risk(positions)
+            pos_list = json.loads(positions)
+        if not pos_list:
+            raise HTTPException(status_code=404, detail="无持仓数据（positions.json 为空）")
+        result = risk_bot.check_position_risk(pos_list)
+        result["alerts"] = _compute_abs_alerts(pos_list)
+        result["positions_source"] = "positions.json (live)"
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def _compute_abs_alerts(pos_list: List[Dict]) -> List[Dict]:
+    """按 positions.json 的 alert_drop/alert_rise（绝对价）判断预警。"""
+    out = []
+    for rule in alert_rules():
+        code = rule["code"]
+        try:
+            q = market_bot.get_quote(code)
+            price = q.get("price") if q and "price" in q else None
+        except Exception:
+            price = None
+        if price is None:
+            continue
+        if rule.get("drop") is not None and price <= rule["drop"]:
+            out.append({"code": code, "name": rule["name"], "type": "跌破预警",
+                       "price": price, "threshold": rule["drop"],
+                       "message": f"⚠️ {rule['name']} 现价 {price} 已跌破预警线 {rule['drop']}"})
+        if rule.get("rise") is not None and price >= rule["rise"]:
+            out.append({"code": code, "name": rule["name"], "type": "突破预警",
+                       "price": price, "threshold": rule["rise"],
+                       "message": f"🎉 {rule['name']} 现价 {price} 已突破预警线 {rule['rise']}"})
+    return out
 
 
 @app.get("/api/risk/alert")
 async def risk_alert():
-    """检查风险预警"""
-    try:
-        positions = [
-            {"code": "002283", "name": "天润工业", "shares": 100, "cost": 4.615},
-            {"code": "600221", "name": "海航控股", "shares": 500, "cost": 8.0047},
-            {"code": "603993", "name": "洛阳钼业", "shares": 300, "cost": 20.58},
-            {"code": "002181", "name": "粤传媒", "shares": 100, "cost": 22.97},
-            {"code": "601618", "name": "中国中冶", "shares": 100, "cost": 3.39},
-        ]
-        alerts = risk_bot.check_alerts(positions)
-        return {"alerts": alerts, "timestamp": risk_bot._get_timestamp()}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """检查风险预警（绝对价，源自 positions.json）。"""
+    alerts = _compute_abs_alerts(active_positions())
+    return {"alerts": alerts, "timestamp": datetime.now().isoformat(),
+            "positions_source": "positions.json"}
 
 
 # ========== 新增 API 接口 ==========
 
 @app.get("/api/market/summary")
 async def market_summary():
-    """获取市场复盘数据"""
+    """获取市场复盘数据。同源：读 14:35 解析的日报（overview/热点/情绪）。"""
+    data = _load_data("market_summary.json")
+    if data and data.get("overview"):
+        return data
+    # 兜底：日报尚未解析，提示前端
     return {
         "date": datetime.now().strftime("%Y-%m-%d"),
-        "indices": {
-            "shanghai": {"price": 3981.12, "change_pct": 0.73},
-            "shenzhen": {"price": 14004.00, "change_pct": 0.37},
-            "chinext": {"price": 3435.82, "change_pct": 0.33}
-        },
-        "hot_sectors": ["AI算力", "半导体", "高股息红利", "华为算力链"],
-        "cool_sectors": ["锂电池", "人形机器人"],
-        "sentiment": "偏谨慎但具韧性，资金向业绩确定性方向切换",
-        "data_source": "mock"
+        "overview": "",
+        "hot_sectors": [],
+        "sentiment": "",
+        "data_source": "pending",
+        "note": "今日日报复盘尚未生成（14:35 后自动落盘），暂无内容。",
     }
 
 
 @app.get("/api/trading/plan")
 async def trading_plan():
-    """获取次日交易计划"""
+    """获取次日交易计划。同源：读 14:35 解析的日报止盈止损块。"""
+    data = _load_data("trading_plan.json")
+    if data and data.get("plans"):
+        return data
     return {
-        "date": (datetime.now()).strftime("%Y-%m-%d"),
-        "plans": [
-            {
-                "code": "002283",
-                "name": "天润工业",
-                "stop_profit": 9.20,
-                "stop_loss": 8.00,
-                "rules": [
-                    "开盘高于8.64且放量，持有看9.00",
-                    "开盘低于8.40且10分钟未收复，减半仓",
-                    "触及止盈9.20自动卖出",
-                    "跌破止损8.00无条件离场"
-                ]
-            },
-            {
-                "code": "600221",
-                "name": "海航控股",
-                "stop_profit": 1.50,
-                "stop_loss": 1.20,
-                "rules": [
-                    "深套-83%，除非重大利好不建议割肉",
-                    "反弹至1.35以上可减仓1/3降成本",
-                    "底部震荡为主，耐心等待"
-                ]
-            },
-            {
-                "code": "603993",
-                "name": "洛阳钼业",
-                "stop_profit": 20.50,
-                "stop_loss": 18.00,
-                "rules": [
-                    "若低开低走破18.50坚决止损",
-                    "企稳19.00上方可持有等反弹至20.00减仓",
-                    "突破20.50分批止盈"
-                ]
-            }
-        ],
-        "data_source": "mock"
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "plans": [],
+        "data_source": "pending",
+        "note": "今日日报交易计划尚未生成（14:35 后自动落盘）。",
     }
 
 
