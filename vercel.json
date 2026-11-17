@@ -2,10 +2,15 @@
   "version": 2,
   "builds": [
     { "src": "backend/api.js", "use": "@vercel/node" },
-    { "src": "frontend/index.html", "use": "@vercel/static" }
+    { "src": "frontend/index.html", "use": "@vercel/static" },
+    { "src": "frontend/vendor/vue.global.prod.js", "use": "@vercel/static" },
+    { "src": "frontend/vendor/element-plus.css", "use": "@vercel/static" },
+    { "src": "frontend/vendor/element-plus.full.min.js", "use": "@vercel/static" },
+    { "src": "frontend/vendor/axios.min.js", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/backend/api.js" },
+    { "src": "/vendor/(.*)", "dest": "/frontend/vendor/$1" },
     { "src": "/frontend/(.*)", "dest": "/frontend/$1" },
     { "src": "/(.*)", "dest": "/frontend/index.html" }
   ]
