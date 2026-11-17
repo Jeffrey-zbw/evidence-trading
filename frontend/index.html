@@ -66,7 +66,7 @@
             <!-- Header -->
             <div class="header">
                 <h1>📊 Evidence-Trading</h1>
-                <p>基于证据链的交易研究工作台 — 不要相信结论，检查证据链</p>
+                <p>基于证据链的交易研究工作台 — 不要相信结论，检查证据链<br><span style="font-size:12px;opacity:.85;">本页内容仅供研究参考，不构成投资建议</span></p>
             </div>
 
             <!-- Status Bar -->
@@ -137,11 +137,11 @@
                     </div>
                     <div v-if="picks[0] && picks[0].logic" class="picks-logic">
                         <div v-for="stock in picks" :key="'l'+stock.code" style="margin-bottom:10px;">
-                            <b>{{ stock.name }}</b>：{{ stock.logic }}
+                            <div v-if="stock.logic"><b>{{ stock.name }}</b>：{{ stock.logic }}</div>
                         </div>
                     </div>
                 </div>
-                <div v-if="picks[0] && picks[0].note" style="margin-top:12px;color:#909399;font-size:12px;">{{ picks[0].note }}{{ picks[0].report_file ? ' · 日报 ' + picks[0].report_file : '' }}</div>
+                <div v-if="picksNote" style="margin-top:12px;color:#909399;font-size:12px;">{{ picksNote }}{{ picks[0] && picks[0].report_file ? ' · 日报 ' + picks[0].report_file : '' }}</div>
             </div>
 
             <!-- Market Summary -->
@@ -200,8 +200,8 @@
                                 <span style="color: #999; font-size: 13px; margin-left: 8px;">{{ plan.code }}</span>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-size: 13px; color: #67c23a;">✅ 止盈: ¥{{ plan.stop_profit }}</div>
-                                <div style="font-size: 13px; color: #f56c6c;">🛑 止损: ¥{{ plan.stop_loss }}</div>
+                                <div v-if="plan.stop_profit != null" style="font-size: 13px; color: #67c23a;">✅ 止盈: ¥{{ plan.stop_profit }}</div>
+                                <div v-if="plan.stop_loss != null" style="font-size: 13px; color: #f56c6c;">🛑 止损: ¥{{ plan.stop_loss }}</div>
                             </div>
                         </div>
                         <div style="font-size: 13px; color: #666;">
@@ -302,20 +302,20 @@
                         <el-table-column prop="name" label="名称" width="120"></el-table-column>
                         <el-table-column prop="shares" label="持仓" width="80"></el-table-column>
                         <el-table-column prop="cost" label="成本价" width="100">
-                            <template #default="{ row }">{{ row.cost.toFixed(2) }}</template>
+                            <template #default="{ row }">{{ row.cost != null ? row.cost.toFixed(2) : '—' }}</template>
                         </el-table-column>
                         <el-table-column prop="current_price" label="现价" width="100">
-                            <template #default="{ row }">{{ row.current_price.toFixed(2) }}</template>
+                            <template #default="{ row }">{{ row.current_price != null ? row.current_price.toFixed(2) : '—' }}</template>
                         </el-table-column>
                         <el-table-column prop="profit_pct" label="盈亏" width="100">
                             <template #default="{ row }">
-                                <span :class="row.profit_pct >= 0 ? 'positive' : 'negative'">
-                                    {{ row.profit_pct >= 0 ? '+' : '' }}{{ row.profit_pct.toFixed(2) }}%
+                                <span :class="row.profit_pct != null && row.profit_pct >= 0 ? 'positive' : 'negative'">
+                                    {{ row.profit_pct != null ? (row.profit_pct>=0?'+':'')+row.profit_pct.toFixed(2) : '—' }}%
                                 </span>
                             </template>
                         </el-table-column>
                         <el-table-column prop="weight" label="占比" width="80">
-                            <template #default="{ row }">{{ row.weight.toFixed(1) }}%</template>
+                            <template #default="{ row }">{{ row.weight != null ? row.weight.toFixed(1)+'%' : '—' }}</template>
                         </el-table-column>
                     </el-table>
                 </div>
@@ -336,6 +336,7 @@
                 const currentDate = ref('');
                 
                 const picks = ref([]);
+                const picksNote = ref('');
                 const marketData = ref(null);
                 const planData = ref(null);
                 const backtestForm = ref({ symbol: '600519', strategy: 'ma_cross' });
@@ -354,14 +355,35 @@
                     }
                 });
                 
+                async function loadSnapshotAll() {
+                    const names = ['market_summary.json','daily_picks.json','trading_plan.json','risk_check.json'];
+                    try {
+                        const results = await Promise.all(names.map(n =>
+                            fetch('../data/' + n).then(r => { if (!r.ok) throw new Error(n + ' ' + r.status); return r.json(); })));
+                        return { market_summary: results[0], daily_picks: results[1],
+                                 trading_plan: results[2], risk_check: results[3] };
+                    } catch (e) { return null; }
+                }
+                function applySnapshot(snap) {
+                    if (!snap) return;
+                    const p = snap.daily_picks || {};
+                    picks.value = Array.isArray(p.picks) ? p.picks : [];
+                    picksNote.value = p.note || '';
+                    marketData.value = snap.market_summary || {};
+                    planData.value = snap.trading_plan || {};
+                    riskResult.value = snap.risk_check || {};
+                    dataSource.value = '快照模式（stockquant）';
+                }
+
                 async function checkApiStatus() {
                     try {
                         const res = await axios.get(API_BASE + '/health');
                         apiStatus.value = 'ok';
                     } catch (e) {
                         apiStatus.value = 'error';
-                        dataSource.value = '本地模式（API 不可用）';
-                        loadMockData();
+                        const snap = await loadSnapshotAll();
+                        applySnapshot(snap);
+                        if (!snap) { dataSource.value = '模拟数据（降级）'; loadMockData(); }
                     }
                 }
                 
@@ -378,11 +400,12 @@
                 }
                 
                 async function loadPicks() {
-                    if (apiStatus.value !== 'ok') return;
+                    if (apiStatus.value !== 'ok') { applySnapshot(await loadSnapshotAll()); return; }
                     loading.value = true;
                     try {
                         const res = await axios.get(API_BASE + '/picks?n=10');
                         picks.value = res.data.picks;
+                        picksNote.value = res.data.note || '';
                         dataSource.value = res.data.data_source === 'mock' ? '模拟数据（降级）' : '实时数据';
                     } catch (e) {
                         ElMessage.error('获取数据失败');
@@ -393,7 +416,7 @@
                 }
                 
                 async function loadMarket() {
-                    if (apiStatus.value !== 'ok') return;
+                    if (apiStatus.value !== 'ok') { applySnapshot(await loadSnapshotAll()); return; }
                     loading.value = true;
                     try {
                         const res = await axios.get(API_BASE + '/market/summary');
@@ -413,7 +436,7 @@
                 }
                 
                 async function loadPlan() {
-                    if (apiStatus.value !== 'ok') return;
+                    if (apiStatus.value !== 'ok') { applySnapshot(await loadSnapshotAll()); return; }
                     loading.value = true;
                     try {
                         const res = await axios.get(API_BASE + '/trading/plan');
@@ -433,6 +456,7 @@
                 }
                 
                 async function runBacktest() {
+                    if (apiStatus.value !== 'ok') { ElMessage.warning('快照模式下回测不可用'); return; }
                     if (!backtestForm.value.symbol || backtestForm.value.symbol.length !== 6) {
                         ElMessage.warning('请输入有效的股票代码');
                         return;
@@ -464,7 +488,7 @@
                 }
                 
                 async function loadRisk() {
-                    if (apiStatus.value !== 'ok') return;
+                    if (apiStatus.value !== 'ok') { applySnapshot(await loadSnapshotAll()); return; }
                     loading.value = true;
                     try {
                         const res = await axios.get(API_BASE + '/risk/check');
@@ -492,7 +516,7 @@
                 
                 return {
                     currentTab, loading, apiStatus, dataSource, currentDate,
-                    picks, marketData, planData, backtestForm, backtestResult, riskResult,
+                    picks, picksNote, marketData, planData, backtestForm, backtestResult, riskResult,
                     loadPicks, loadMarket, loadPlan, runBacktest, loadRisk, showQuoteDetail
                 };
             }
