@@ -10,8 +10,8 @@
       "name": "太阳能",
       "shares": null,
       "cost": null,
-      "current_price": 4.4,
-      "profit_pct": -4.28,
+      "current_price": 4.43,
+      "profit_pct": -3.63,
       "weight": null
     },
     {
@@ -19,8 +19,8 @@
       "name": "巨轮智能",
       "shares": null,
       "cost": null,
-      "current_price": 4.89,
-      "profit_pct": -12.09,
+      "current_price": 4.8,
+      "profit_pct": -13.71,
       "weight": null
     },
     {
@@ -28,8 +28,8 @@
       "name": "粤 传 媒",
       "shares": null,
       "cost": null,
-      "current_price": 9.83,
-      "profit_pct": -57.2,
+      "current_price": 9.67,
+      "profit_pct": -57.9,
       "weight": null
     },
     {
@@ -55,8 +55,8 @@
       "name": "中国中冶",
       "shares": null,
       "cost": null,
-      "current_price": 2.53,
-      "profit_pct": -25.37,
+      "current_price": 2.55,
+      "profit_pct": -24.78,
       "weight": null
     },
     {
@@ -73,8 +73,8 @@
       "name": "洛阳钼业",
       "shares": null,
       "cost": null,
-      "current_price": 12.31,
-      "profit_pct": -64.48,
+      "current_price": 12.51,
+      "profit_pct": -63.9,
       "weight": null
     }
   ],
@@ -82,8 +82,18 @@
     "上证3603 ≤ MA20 3662(趋势门槛)",
     "sentiment_missing(情绪数据缺失,未判情绪门槛,MA20照常)"
   ],
-  "timestamp": "2026-11-17T10:16:23",
+  "timestamp": "2026-11-17T14:45:48",
   "alerts": [
+    {
+      "id": 1639,
+      "ts": "2026-11-17 14:08:38",
+      "trade_date": "2026-11-17",
+      "code": "002031",
+      "name": "巨轮智能",
+      "type": "drop",
+      "message": "盘中大跌 -5.15%",
+      "is_read": 0
+    },
     {
       "id": 1332,
       "ts": "2026-11-17 09:33:21",
