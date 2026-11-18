@@ -1,26 +1,26 @@
 {
-  "date": "2026-11-17",
+  "date": "2026-11-18",
   "plans": [
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "当日双门槛关闭(上证3603 ≤ MA20 3662(趋势门槛)；sentiment_missing(情绪数据缺失,未判情绪门槛,MA20照常))，信号胜率偏低，建议轻仓防守"
+      "rules": "当日双门槛关闭(上证3585 ≤ MA20 3655(趋势门槛)；情绪分 41 < 60(情绪门槛))，信号胜率偏低，建议轻仓防守"
     },
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "均线多头(bull_align) 自动转观察:稳健分 -2.1% < -1%;该策略信号 observation-only,不建议新增仓位(仅供参考)"
+      "rules": "均线多头(bull_align) 自动转观察:稳健分 -4.9% < -1%;该策略信号 observation-only,不建议新增仓位(仅供参考)"
     },
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "回踩MA20(pullback) 自动转观察:稳健分 -13.9% < -1%、N 日胜率 22.1% < 30%(290 笔);该策略信号 observation-only,不建议新增仓位(仅供参考)"
+      "rules": "回踩MA20(pullback) 自动转观察:稳健分 -9.8% < -1%、N 日胜率 24.1% < 30%(299 笔);该策略信号 observation-only,不建议新增仓位(仅供参考)"
     },
     {
       "name": "规则化提示",
