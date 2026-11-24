@@ -10,8 +10,8 @@
       "name": "太阳能",
       "shares": null,
       "cost": null,
-      "current_price": 4.17,
-      "profit_pct": -9.28,
+      "current_price": 4.22,
+      "profit_pct": -8.2,
       "weight": null
     },
     {
@@ -19,8 +19,17 @@
       "name": "巨轮智能",
       "shares": null,
       "cost": null,
-      "current_price": 4.38,
-      "profit_pct": -21.26,
+      "current_price": 4.64,
+      "profit_pct": -16.58,
+      "weight": null
+    },
+    {
+      "code": "002042",
+      "name": "华孚时尚",
+      "shares": null,
+      "cost": null,
+      "current_price": 3.78,
+      "profit_pct": -0.79,
       "weight": null
     },
     {
@@ -28,8 +37,8 @@
       "name": "粤 传 媒",
       "shares": null,
       "cost": null,
-      "current_price": 8.4,
-      "profit_pct": -63.43,
+      "current_price": 8.87,
+      "profit_pct": -61.38,
       "weight": null
     },
     {
@@ -37,8 +46,8 @@
       "name": "天润工业",
       "shares": null,
       "cost": null,
-      "current_price": 6.38,
-      "profit_pct": 39.76,
+      "current_price": 6.53,
+      "profit_pct": 43.04,
       "weight": null
     },
     {
@@ -55,8 +64,8 @@
       "name": "中国中冶",
       "shares": null,
       "cost": null,
-      "current_price": 2.55,
-      "profit_pct": -24.78,
+      "current_price": 2.51,
+      "profit_pct": -25.96,
       "weight": null
     },
     {
@@ -64,8 +73,8 @@
       "name": "苏垦农发",
       "shares": null,
       "cost": null,
-      "current_price": 7.69,
-      "profit_pct": -22.91,
+      "current_price": 7.71,
+      "profit_pct": -22.71,
       "weight": null
     },
     {
@@ -73,28 +82,14 @@
       "name": "洛阳钼业",
       "shares": null,
       "cost": null,
-      "current_price": 11.68,
-      "profit_pct": -66.3,
+      "current_price": 11.7,
+      "profit_pct": -66.24,
       "weight": null
     }
   ],
-  "risks": [
-    "上证3578 ≤ MA20 3644(趋势门槛)",
-    "sentiment_missing(情绪数据缺失,未判情绪门槛,MA20照常)"
-  ],
-  "timestamp": "2026-11-20T14:45:35",
-  "alerts": [
-    {
-      "id": 2163,
-      "ts": "2026-11-20 10:06:33",
-      "trade_date": "2026-11-20",
-      "code": "603993",
-      "name": "洛阳钼业",
-      "type": "drop",
-      "message": "盘中大跌 -5.05%",
-      "is_read": 0
-    }
-  ],
+  "risks": [],
+  "timestamp": "2026-11-24T14:45:15",
+  "alerts": [],
   "positions_source": "realtime",
   "note": "不构成投资建议",
   "data_source": "stockquant-snapshot"

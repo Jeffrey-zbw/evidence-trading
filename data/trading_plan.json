@@ -1,33 +1,33 @@
 {
-  "date": "2026-11-20",
+  "date": "2026-11-24",
   "plans": [
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "当日双门槛关闭(上证3578 ≤ MA20 3644(趋势门槛)；sentiment_missing(情绪数据缺失,未判情绪门槛,MA20照常))，信号胜率偏低，建议轻仓防守"
+      "rules": "指数处于MA20下方震荡市，控制总体仓位，等待大盘站上20日线再加仓"
     },
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "动量突破(momentum) 自动转观察:稳健分 -1.9% < -1%;该策略信号 observation-only,不建议新增仓位(仅供参考)"
+      "rules": "动量突破(momentum) 自动转观察:稳健分 -2.3% < -1%;该策略信号 observation-only,不建议新增仓位(仅供参考)"
     },
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "均线多头(bull_align) 自动转观察:稳健分 -3.7% < -1%;该策略信号 observation-only,不建议新增仓位(仅供参考)"
+      "rules": "均线多头(bull_align) 自动转观察:未达退化阈值,状态保持;该策略信号 observation-only,不建议新增仓位(仅供参考)"
     },
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "回踩MA20(pullback) 自动转观察:稳健分 -4.5% < -1%、N 日胜率 27.0% < 30%(300 笔);该策略信号 observation-only,不建议新增仓位(仅供参考)"
+      "rules": "回踩MA20(pullback) 自动转观察:稳健分 -2.8% < -1%、N 日胜率 26.3% < 30%(300 笔);该策略信号 observation-only,不建议新增仓位(仅供参考)"
     },
     {
       "name": "规则化提示",
