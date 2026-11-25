@@ -1,7 +1,7 @@
 {
-  "total_value": 7990.0,
-  "total_pnl": -7818.79,
-  "total_pnl_pct": -97.86,
+  "total_value": 7904.0,
+  "total_pnl": -7904.79,
+  "total_pnl_pct": -100.01,
   "risk_score": null,
   "risk_level": "防守（双门槛关闭）",
   "positions": [
@@ -10,18 +10,18 @@
       "name": "太阳能",
       "shares": 300,
       "cost": 4.5967,
-      "current_price": 4.15,
-      "profit_pct": -9.72,
-      "weight": 15.6
+      "current_price": 4.08,
+      "profit_pct": -11.24,
+      "weight": 15.5
     },
     {
       "code": "002031",
       "name": "巨轮智能",
       "shares": 200,
       "cost": 5.5625,
-      "current_price": 4.48,
-      "profit_pct": -19.46,
-      "weight": 11.2
+      "current_price": 4.4,
+      "profit_pct": -20.9,
+      "weight": 11.1
     },
     {
       "code": "002042",
@@ -30,24 +30,24 @@
       "cost": 3.81,
       "current_price": 3.99,
       "profit_pct": 4.72,
-      "weight": 10.0
+      "weight": 10.1
     },
     {
       "code": "002181",
       "name": "粤 传 媒",
       "shares": 100,
       "cost": 22.9667,
-      "current_price": 8.65,
-      "profit_pct": -62.34,
-      "weight": 10.8
+      "current_price": 8.48,
+      "profit_pct": -63.08,
+      "weight": 10.7
     },
     {
       "code": "002283",
       "name": "天润工业",
       "shares": 100,
       "cost": 4.565,
-      "current_price": 6.42,
-      "profit_pct": 40.64,
+      "current_price": 6.31,
+      "profit_pct": 38.23,
       "weight": 8.0
     },
     {
@@ -55,43 +55,43 @@
       "name": "海航控股",
       "shares": 500,
       "cost": 8.0047,
-      "current_price": 1.16,
-      "profit_pct": -85.51,
-      "weight": 7.3
+      "current_price": 1.17,
+      "profit_pct": -85.38,
+      "weight": 7.4
     },
     {
       "code": "601618",
       "name": "中国中冶",
       "shares": 100,
       "cost": 3.39,
-      "current_price": 2.5,
-      "profit_pct": -26.25,
-      "weight": 3.1
+      "current_price": 2.51,
+      "profit_pct": -25.96,
+      "weight": 3.2
     },
     {
       "code": "601952",
       "name": "苏垦农发",
       "shares": 200,
       "cost": 9.9751,
-      "current_price": 7.74,
-      "profit_pct": -22.41,
-      "weight": 19.4
+      "current_price": 7.63,
+      "profit_pct": -23.51,
+      "weight": 19.3
     },
     {
       "code": "603993",
       "name": "洛阳钼业",
       "shares": 100,
       "cost": 34.6574,
-      "current_price": 11.66,
-      "profit_pct": -66.36,
-      "weight": 14.6
+      "current_price": 11.61,
+      "profit_pct": -66.5,
+      "weight": 14.7
     }
   ],
   "risks": [
     "上证3548 ≤ MA20 3624(趋势门槛)",
     "sentiment_missing(情绪数据缺失,未判情绪门槛,MA20照常)"
   ],
-  "timestamp": "2026-11-25T13:40:07",
+  "timestamp": "2026-11-25T14:45:45",
   "alerts": [
     {
       "id": 2221,
