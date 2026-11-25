@@ -1,7 +1,7 @@
 {
-  "total_value": 7981.0,
-  "total_pnl": -7827.79,
-  "total_pnl_pct": -98.08,
+  "total_value": 7990.0,
+  "total_pnl": -7818.79,
+  "total_pnl_pct": -97.86,
   "risk_score": null,
   "risk_level": "防守（双门槛关闭）",
   "positions": [
@@ -10,8 +10,8 @@
       "name": "太阳能",
       "shares": 300,
       "cost": 4.5967,
-      "current_price": 4.14,
-      "profit_pct": -9.94,
+      "current_price": 4.15,
+      "profit_pct": -9.72,
       "weight": 15.6
     },
     {
@@ -19,8 +19,8 @@
       "name": "巨轮智能",
       "shares": 200,
       "cost": 5.5625,
-      "current_price": 4.47,
-      "profit_pct": -19.64,
+      "current_price": 4.48,
+      "profit_pct": -19.46,
       "weight": 11.2
     },
     {
@@ -28,8 +28,8 @@
       "name": "华孚时尚",
       "shares": 200,
       "cost": 3.81,
-      "current_price": 3.98,
-      "profit_pct": 4.46,
+      "current_price": 3.99,
+      "profit_pct": 4.72,
       "weight": 10.0
     },
     {
@@ -37,8 +37,8 @@
       "name": "粤 传 媒",
       "shares": 100,
       "cost": 22.9667,
-      "current_price": 8.64,
-      "profit_pct": -62.38,
+      "current_price": 8.65,
+      "profit_pct": -62.34,
       "weight": 10.8
     },
     {
@@ -46,9 +46,9 @@
       "name": "天润工业",
       "shares": 100,
       "cost": 4.565,
-      "current_price": 6.43,
-      "profit_pct": 40.85,
-      "weight": 8.1
+      "current_price": 6.42,
+      "profit_pct": 40.64,
+      "weight": 8.0
     },
     {
       "code": "600221",
@@ -73,8 +73,8 @@
       "name": "苏垦农发",
       "shares": 200,
       "cost": 9.9751,
-      "current_price": 7.73,
-      "profit_pct": -22.51,
+      "current_price": 7.74,
+      "profit_pct": -22.41,
       "weight": 19.4
     },
     {
@@ -91,7 +91,7 @@
     "上证3548 ≤ MA20 3624(趋势门槛)",
     "sentiment_missing(情绪数据缺失,未判情绪门槛,MA20照常)"
   ],
-  "timestamp": "2026-11-25T13:39:21",
+  "timestamp": "2026-11-25T13:40:07",
   "alerts": [
     {
       "id": 2221,
