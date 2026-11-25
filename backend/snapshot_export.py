@@ -26,6 +26,16 @@ def post_json(url, obj, timeout=15):
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode("utf-8"))
 
+def fetch_portfolio(token):
+    """GET /api/portfolio（X-Auth）。任何失败（401/500/超时/非 list）返回 None 并打降级日志。"""
+    try:
+        d = get_json(BASE + "/api/portfolio", token=token, timeout=15)
+        items = (d or {}).get("items")
+        return items if isinstance(items, list) and items else None
+    except Exception as e:
+        print(f"[snapshot] portfolio 不可用，降级: {e}", file=sys.stderr)
+        return None
+
 def read_access_code():
     if not ENV_FILE.exists():
         die(5, f"找不到 {ENV_FILE}（stockquant 仓库 .env 缺失，AI盘未挂载？）")
@@ -62,6 +72,7 @@ def main():
     market, sentiment, signal = s.get("market") or {}, s.get("sentiment") or {}, s.get("signal") or {}
     win, hsum = signal.get("win_rate"), s.get("holdings") or {}
     gate, holdings = report.get("gate") or {}, report.get("holdings") or []
+    port = fetch_portfolio(token)      # 43单: 持仓补全数据源；None 时降级回落 daily_report holdings 老映射
 
     market_summary = {                     # ← summary（大盘/情绪/信号胜率）
         "date": today,
@@ -100,20 +111,43 @@ def main():
                    "rules": a} for a in advice],
         "data_source": "stockquant-snapshot", "risk_levels": [], "report_file": "",
     }
-    risk_check = {                         # ← holdings + gate + day_alerts（稳健结论在 risks）
-        "total_value": 0, "total_pnl": 0,
-        "total_pnl_pct": round((hsum.get("total_pnl_pct") or 0) * 100, 2),
-        "risk_score": None,
-        "risk_level": "开放（双门槛开启）" if gate.get("open") else "防守（双门槛关闭）",
-        "positions": [
+    if port:
+        # 43单口径（写进代码注释）: total_value=Σ(price*qty); total_pnl=Σ((price-cost)*qty) 成本口径近似;
+        # weight=该只市值/总市值*100; profit_pct=pnl_pct*100; positions_source=portfolio-api
+        total_mv = sum(((p.get("price") or 0) * (p.get("qty") or 0)) for p in port)
+        positions = [
+            {"code": p.get("code"), "name": p.get("name"),
+             "shares": p.get("qty"), "cost": p.get("cost"),
+             "current_price": p.get("price"),
+             "profit_pct": round((p.get("pnl_pct") or 0) * 100, 2),
+             "weight": round(((p.get("price") or 0) * (p.get("qty") or 0)) / total_mv * 100, 1)
+                        if total_mv else None}
+            for p in port]
+        total_value = round(total_mv, 2)
+        total_pnl = round(sum(((p.get("price") or 0) - (p.get("cost") or 0)) * (p.get("qty") or 0)
+                              for p in port), 2)
+        pnl_pct = round(total_pnl / total_value * 100, 2) if total_value else 0
+        positions_source = "portfolio-api"
+    else:
+        # 降级兜底: 保持 11-24 前老行为（daily_report holdings，shares/cost/weight=null，total_value=0）
+        positions = [
             {"code": h.get("code"), "name": h.get("name"), "shares": None, "cost": None,
              "current_price": h.get("price"),
              "profit_pct": round((h.get("pnl_pct") or 0) * 100, 2), "weight": None}
-            for h in holdings],
+            for h in holdings]
+        total_value, total_pnl = 0, 0
+        pnl_pct = round((hsum.get("total_pnl_pct") or 0) * 100, 2)
+        positions_source = report.get("holdings_source") or "unknown"
+    risk_check = {
+        "total_value": total_value, "total_pnl": total_pnl,
+        "total_pnl_pct": pnl_pct,
+        "risk_score": None,
+        "risk_level": "开放（双门槛开启）" if gate.get("open") else "防守（双门槛关闭）",
+        "positions": positions,
         "risks": gate.get("reasons") or [],
         "timestamp": datetime.now().isoformat(timespec="seconds"),
         "alerts": report.get("day_alerts") or [],
-        "positions_source": report.get("holdings_source") or "unknown",
+        "positions_source": positions_source,
         "note": DISCLAIMER,
         "data_source": "stockquant-snapshot",
     }

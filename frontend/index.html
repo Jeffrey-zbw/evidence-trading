@@ -295,6 +295,10 @@
                         <div class="metric-value">{{ riskResult.total_pnl_pct?.toFixed(2) }}%</div>
                         <div class="metric-label">盈亏比例</div>
                     </div>
+                    <div class="metric-card">
+                        <div class="metric-value">{{ riskResult.total_value ? '¥' + Number(riskResult.total_value).toLocaleString() : '—' }}</div>
+                        <div class="metric-label">总市值</div>
+                    </div>
                 </div>
                 
                 <div v-if="riskResult?.positions" style="margin-top: 20px;">
