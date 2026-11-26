@@ -1,40 +1,40 @@
 {
-  "date": "2026-11-25",
+  "date": "2026-11-26",
   "plans": [
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "当日双门槛关闭(上证3548 ≤ MA20 3624(趋势门槛)；sentiment_missing(情绪数据缺失,未判情绪门槛,MA20照常))，信号胜率偏低，建议轻仓防守"
+      "rules": "指数处于MA20下方震荡市，控制总体仓位，等待大盘站上20日线再加仓"
     },
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "动量突破(momentum) 自动转观察:稳健分 -2.9% < -1%;该策略信号 observation-only,不建议新增仓位(仅供参考)"
+      "rules": "动量突破(momentum) 自动转观察:稳健分 -2.6% < -1%;该策略信号 observation-only,不建议新增仓位(仅供参考)"
     },
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "均线多头(bull_align) 自动转观察:稳健分 -1.5% < -1%;该策略信号 observation-only,不建议新增仓位(仅供参考)"
+      "rules": "均线多头(bull_align) 已自动退役:observing 连续 10 期无改善;历史 picks/reviews 全部保留,其信号 observation-only;复活:python -m app.jobs.strategy_guard revive bull_align(仅供参考)"
     },
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "回踩MA20(pullback) 自动转观察:稳健分 -2.6% < -1%、N 日胜率 26.2% < 30%(294 笔);该策略信号 observation-only,不建议新增仓位(仅供参考)"
+      "rules": "回踩MA20(pullback) 已自动退役:observing 连续 10 期无改善;历史 picks/reviews 全部保留,其信号 observation-only;复活:python -m app.jobs.strategy_guard revive pullback(仅供参考)"
     },
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "布林突破(boll_break) 自动转观察:稳健分 -2.1% < -1%;该策略信号 observation-only,不建议新增仓位(仅供参考)"
+      "rules": "布林突破(boll_break) 已自动退役:observing 连续 10 期无改善;历史 picks/reviews 全部保留,其信号 observation-only;复活:python -m app.jobs.strategy_guard revive boll_break(仅供参考)"
     },
     {
       "name": "规则化提示",
