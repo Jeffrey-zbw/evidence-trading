@@ -1,7 +1,7 @@
 {
-  "total_value": 7859.0,
-  "total_pnl": -7949.79,
-  "total_pnl_pct": -101.16,
+  "total_value": 7339.0,
+  "total_pnl": -6173.12,
+  "total_pnl_pct": -84.11,
   "risk_score": null,
   "risk_level": "防守（双门槛关闭）",
   "positions": [
@@ -10,86 +10,101 @@
       "name": "太阳能",
       "shares": 300,
       "cost": 4.5967,
-      "current_price": 4.05,
-      "profit_pct": -11.89,
-      "weight": 15.5
+      "current_price": 4.22,
+      "profit_pct": -8.2,
+      "weight": 17.3
     },
     {
       "code": "002031",
       "name": "巨轮智能",
       "shares": 200,
       "cost": 5.5625,
-      "current_price": 4.31,
-      "profit_pct": -22.52,
-      "weight": 11.0
+      "current_price": 4.59,
+      "profit_pct": -17.48,
+      "weight": 12.5
     },
     {
       "code": "002042",
       "name": "华孚时尚",
       "shares": 200,
       "cost": 3.81,
-      "current_price": 3.93,
-      "profit_pct": 3.15,
-      "weight": 10.0
-    },
-    {
-      "code": "002181",
-      "name": "粤 传 媒",
-      "shares": 100,
-      "cost": 22.9667,
-      "current_price": 8.42,
-      "profit_pct": -63.34,
-      "weight": 10.7
+      "current_price": 4.23,
+      "profit_pct": 11.02,
+      "weight": 11.5
     },
     {
       "code": "002283",
       "name": "天润工业",
       "shares": 100,
       "cost": 4.565,
-      "current_price": 6.15,
-      "profit_pct": 34.72,
-      "weight": 7.8
+      "current_price": 6.56,
+      "profit_pct": 43.7,
+      "weight": 8.9
     },
     {
       "code": "600221",
       "name": "海航控股",
       "shares": 500,
       "cost": 8.0047,
-      "current_price": 1.16,
-      "profit_pct": -85.51,
-      "weight": 7.4
+      "current_price": 1.17,
+      "profit_pct": -85.38,
+      "weight": 8.0
     },
     {
       "code": "601618",
       "name": "中国中冶",
       "shares": 100,
       "cost": 3.39,
-      "current_price": 2.47,
-      "profit_pct": -27.14,
-      "weight": 3.1
+      "current_price": 2.54,
+      "profit_pct": -25.07,
+      "weight": 3.5
     },
     {
       "code": "601952",
       "name": "苏垦农发",
       "shares": 200,
       "cost": 9.9751,
-      "current_price": 7.66,
-      "profit_pct": -23.21,
-      "weight": 19.5
+      "current_price": 7.75,
+      "profit_pct": -22.31,
+      "weight": 21.1
     },
     {
       "code": "603993",
       "name": "洛阳钼业",
       "shares": 100,
       "cost": 34.6574,
-      "current_price": 11.8,
-      "profit_pct": -65.95,
-      "weight": 15.0
+      "current_price": 12.64,
+      "profit_pct": -63.53,
+      "weight": 17.2
     }
   ],
-  "risks": [],
-  "timestamp": "2026-11-26T14:45:15",
-  "alerts": [],
+  "risks": [
+    "上证3477 ≤ MA20 3605(趋势门槛)",
+    "sentiment_missing(情绪数据缺失,未判情绪门槛,MA20照常)"
+  ],
+  "timestamp": "2026-11-27T14:46:26",
+  "alerts": [
+    {
+      "id": 2287,
+      "ts": "2026-11-27 11:12:20",
+      "trade_date": "2026-11-27",
+      "code": "002042",
+      "name": "华孚时尚",
+      "type": "surge",
+      "message": "盘中大涨 8.02%",
+      "is_read": 1
+    },
+    {
+      "id": 2277,
+      "ts": "2026-11-27 09:43:25",
+      "trade_date": "2026-11-27",
+      "code": "002042",
+      "name": "华孚时尚",
+      "type": "target",
+      "message": "触及止盈参考位 4.23",
+      "is_read": 1
+    }
+  ],
   "positions_source": "portfolio-api",
   "note": "不构成投资建议",
   "data_source": "stockquant-snapshot"

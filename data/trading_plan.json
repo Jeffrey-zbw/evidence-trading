@@ -1,12 +1,19 @@
 {
-  "date": "2026-11-26",
+  "date": "2026-11-27",
   "plans": [
     {
       "name": "规则化提示",
       "code": "",
       "stop_profit": null,
       "stop_loss": null,
-      "rules": "指数处于MA20下方震荡市，控制总体仓位，等待大盘站上20日线再加仓"
+      "rules": "当日双门槛关闭(上证3477 ≤ MA20 3605(趋势门槛)；sentiment_missing(情绪数据缺失,未判情绪门槛,MA20照常))，信号胜率偏低，建议轻仓防守"
+    },
+    {
+      "name": "规则化提示",
+      "code": "",
+      "stop_profit": null,
+      "stop_loss": null,
+      "rules": "华孚时尚 已触及止盈线，可按计划部分兑现"
     },
     {
       "name": "规则化提示",
